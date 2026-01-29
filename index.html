@@ -324,9 +324,10 @@
         jsEditor.on('change', updatePreview);
 
         function loadDefaultExample() {
-            htmlEditor.setValue('<h1>Welcome to CodeLab!</h1>\n<p>This is your first HTML page.</p>\n<button id="myButton">Click me!</button>\n<p id="message"></p>');
+            htmlEditor.setValue('<h1>Welcome to CodeLab!</h1>\n<p>This is your first HTML page.</p>\n<br>\n<button id="myButton">Click me!</button>\n<p id="message"></p>');
             cssEditor.setValue(`body {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(to top right, #667eea, #764ba2);
+  height: 100vh;
   color: white;
   padding: 40px;
 }
@@ -349,7 +350,7 @@ button:hover {
   background-color: #3182ce;
 }`);
             jsEditor.setValue(`document.getElementById("myButton").addEventListener("click", function() {
-  document.getElementById("message").textContent = "👋 Hello, <write your name here>!";
+  document.getElementById("message").textContent = "👋 Hello, <write your name here> !";
   document.getElementById("myButton").style.display = "none";
 })`);
             updatePreview();
