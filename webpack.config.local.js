@@ -21,7 +21,7 @@ function assetsPath(_path) {
 }
 
 if (process.env.NODE_ENV == "production") {
-	//需要做打包分析时、用个插件
+	// Use BundleAnalyzerPlugin for package analysis.
 	plugins = [new BundleAnalyzerPlugin(), new CleanWebpackPlugin()];
 	//plugins = [new CleanWebpackPlugin()];
 } else if (process.env.NODE_ENV == "development") {
