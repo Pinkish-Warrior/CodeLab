@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CodeLab - Learn to Code</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon_io/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon_io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon_io/favicon-16x16.png">
+    <link rel="manifest" href="favicon_io/site.webmanifest">
+    <link rel="shortcut icon" href="favicon_io/favicon.ico">
+    <link rel="stylesheet" href="node_modules/codemirror/lib/codemirror.css">
+    <link rel="stylesheet" href="node_modules/codemirror/theme/dracula.css">
     <style>
         * {
             margin: 0;
@@ -170,6 +177,11 @@
             text-align: center;
             border-top: 1px solid #2d2d3d;
         }
+
+        .CodeMirror {
+            height: 100%;
+            font-family: 'Fira Code', 'Cascadia Code', monospace;
+        }
     </style>
 </head>
 <body>
@@ -187,9 +199,9 @@
             </div>
 
             <div class="editor-container">
-                <textarea id="htmlCode" class="editor-content active"></textarea>
-                <textarea id="cssCode" class="editor-content"></textarea>
-                <textarea id="jsCode" class="editor-content"></textarea>
+                <textarea id="htmlCode"></textarea>
+                <textarea id="cssCode"></textarea>
+                <textarea id="jsCode"></textarea>
             </div>
 
             <div class="info-message">
@@ -211,25 +223,81 @@
         </div>
     </div>
 
+    <script src="node_modules/codemirror/lib/codemirror.js"></script>
+    <script src="node_modules/codemirror/mode/xml/xml.js"></script>
+    <script src="node_modules/codemirror/mode/css/css.js"></script>
+    <script src="node_modules/codemirror/mode/javascript/javascript.js"></script>
     <script>
-        const htmlCode = document.getElementById('htmlCode');
-        const cssCode = document.getElementById('cssCode');
-        const jsCode = document.getElementById('jsCode');
         const preview = document.getElementById('preview');
         const tabs = document.querySelectorAll('.tab');
-        const editors = document.querySelectorAll('.editor-content');
+
+        // Custom command for full document auto-indentation
+        CodeMirror.commands.indentAutoAll = function(cm) {
+            cm.operation(function() {
+                for (let i = 0; i < cm.lineCount(); i++) {
+                    cm.indentLine(i);
+                }
+            });
+        };
+
+        const editorOptions = {
+            theme: 'dracula',
+            lineNumbers: true,
+            autoCloseBrackets: true,
+            extraKeys: {
+                "Ctrl-I": "indentAutoAll",
+                "Cmd-I": "indentAutoAll", // For macOS
+            }
+        };
+
+        const htmlEditor = CodeMirror.fromTextArea(document.getElementById('htmlCode'), {
+            mode: 'xml',
+            autoCloseTags: true,
+            ...editorOptions
+        });
+
+        const cssEditor = CodeMirror.fromTextArea(document.getElementById('cssCode'), {
+            mode: 'css',
+            ...editorOptions
+        });
+
+        const jsEditor = CodeMirror.fromTextArea(document.getElementById('jsCode'), {
+            mode: 'javascript',
+            ...editorOptions
+        });
+
+        const editorWrappers = {
+            html: htmlEditor.getWrapperElement(),
+            css: cssEditor.getWrapperElement(),
+            js: jsEditor.getWrapperElement(),
+        };
 
         function switchTab(tab, element) {
-            editors.forEach(editor => editor.classList.remove('active'));
+            // Deactivate all tabs
             tabs.forEach(t => t.classList.remove('active'));
-            document.getElementById(tab + 'Code').classList.add('active');
+            // Hide all editors
+            for (const key in editorWrappers) {
+                editorWrappers[key].style.display = 'none';
+            }
+
+            // Activate the selected tab
             element.classList.add('active');
+            // Show the selected editor
+            editorWrappers[tab].style.display = 'block';
+            // Refresh the selected editor
+            if (tab === 'html') {
+                htmlEditor.refresh();
+            } else if (tab === 'css') {
+                cssEditor.refresh();
+            } else if (tab === 'js') {
+                jsEditor.refresh();
+            }
         }
 
         function updatePreview() {
-            const html = htmlCode.value;
-            const css = cssCode.value;
-            const js = jsCode.value;
+            const html = htmlEditor.getValue();
+            const css = cssEditor.getValue();
+            const js = jsEditor.getValue();
 
             const completeHTML = `<!DOCTYPE html>
 <html>
@@ -248,24 +316,16 @@
     <\/script>
 </body>
 </html>`;
-
-            // The 'srcdoc' approach (commented out below) is the recommended fix for the text selection issue.
-            // preview.srcdoc = completeHTML;
-
-            // Reverted to the original approach as requested for understanding the process.
-            // This method can cause browsers to block text selection due to security sandboxing.
-            preview.contentDocument.open();
-            preview.contentDocument.write(completeHTML);
-            preview.contentDocument.close();
+            preview.srcdoc = completeHTML;
         }
 
-        htmlCode.addEventListener('input', updatePreview);
-        cssCode.addEventListener('input', updatePreview);
-        jsCode.addEventListener('input', updatePreview);
+        htmlEditor.on('change', updatePreview);
+        cssEditor.on('change', updatePreview);
+        jsEditor.on('change', updatePreview);
 
         function loadDefaultExample() {
-            htmlCode.value = '<h1>Welcome to CodeLab!</h1>\n<p>This is your first HTML page.</p>\n<button id="myButton">Click me!</button>\n<p id="message"></p>';
-            cssCode.value = cssCode.value = `body {
+            htmlEditor.setValue('<h1>Welcome to CodeLab!</h1>\n<p>This is your first HTML page.</p>\n<button id="myButton">Click me!</button>\n<p id="message"></p>');
+            cssEditor.setValue(`body {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   padding: 40px;
@@ -287,18 +347,18 @@ button {
 
 button:hover {
   background-color: #3182ce;
-}`;
-            jsCode.value = `document.getElementById("myButton").addEventListener("click", function() {
+}`);
+            jsEditor.setValue(`document.getElementById("myButton").addEventListener("click", function() {
   document.getElementById("message").textContent = "👋 Hello, <write your name here>!";
   document.getElementById("myButton").style.display = "none";
-})`;
+})`);
             updatePreview();
         }
 
         function downloadCode() {
-            const html = htmlCode.value;
-            const css = cssCode.value;
-            const js = jsCode.value;
+            const html = htmlEditor.getValue();
+            const css = cssEditor.getValue();
+            const js = jsEditor.getValue();
 
             const completeHTML = `<!DOCTYPE html>
 <html>
@@ -327,13 +387,19 @@ button:hover {
         }
 
         function clearCode() {
-            htmlCode.value = '';
-            cssCode.value = '';
-            jsCode.value = '';
+            htmlEditor.setValue('');
+            cssEditor.setValue('');
+            jsEditor.setValue('');
             updatePreview();
         }
 
-        window.addEventListener('DOMContentLoaded', loadDefaultExample);
+        window.addEventListener('DOMContentLoaded', () => {
+            loadDefaultExample();
+            // Show HTML editor by default
+            editorWrappers.css.style.display = 'none';
+            editorWrappers.js.style.display = 'none';
+            htmlEditor.refresh();
+        });
     </script>
 </body>
 </html>
