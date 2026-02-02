@@ -9,9 +9,12 @@
     <link rel="icon" type="image/png" sizes="16x16" href="favicon_io/favicon-16x16.png">
     <link rel="manifest" href="favicon_io/site.webmanifest">
     <link rel="shortcut icon" href="favicon_io/favicon.ico">
-    <link rel="stylesheet" href="node_modules/codemirror/lib/codemirror.css">
-    <link rel="stylesheet" href="node_modules/codemirror/theme/dracula.css">
-    <link rel="stylesheet" href="node_modules/codemirror/theme/solarized.css">
+    
+    <!-- CodeMirror CDN Links -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/solarized.min.css">
+    
     <style>
         :root {
             --background-deep: #0f0f12;
@@ -83,7 +86,7 @@
             display: flex;
             flex-direction: column;
             background-color: var(--background-medium);
-            border-radius: 12px; /* Softer corners */
+            border-radius: 12px;
             overflow: hidden;
             border: 1px solid var(--border-color);
         }
@@ -161,7 +164,7 @@
         }
 
         .btn.secondary {
-            background-color: #7c3aed; /* Vibrant Purple */
+            background-color: #7c3aed;
             border: none;
             color: #fff;
         }
@@ -286,10 +289,12 @@
         </div>
     </div>
 
-    <script src="node_modules/codemirror/lib/codemirror.js"></script>
-    <script src="node_modules/codemirror/mode/xml/xml.js"></script>
-    <script src="node_modules/codemirror/mode/css/css.js"></script>
-    <script src="node_modules/codemirror/mode/javascript/javascript.js"></script>
+    <!-- CodeMirror CDN Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    
     <script>
         const preview = document.getElementById('preview');
         const tabs = document.querySelectorAll('.tab');
@@ -306,12 +311,12 @@
         };
 
         const editorOptions = {
-            theme: 'dracula', // Default dark theme
+            theme: 'dracula',
             lineNumbers: true,
             autoCloseBrackets: true,
             extraKeys: {
                 "Ctrl-I": "indentAutoAll",
-                "Cmd-I": "indentAutoAll", // For macOS
+                "Cmd-I": "indentAutoAll",
             }
         };
 
@@ -455,7 +460,7 @@ button:hover {
             updatePreview();
         }
 
-        // Theme switching logic
+        // Theme switching logic with error handling
         function applyTheme(isLightMode) {
             if (isLightMode) {
                 body.classList.add('light-mode');
@@ -473,7 +478,11 @@ button:hover {
         themeToggle.addEventListener('change', () => {
             const isLight = themeToggle.checked;
             applyTheme(isLight);
-            localStorage.setItem('themePreference', isLight ? 'light' : 'dark');
+            try {
+                localStorage.setItem('themePreference', isLight ? 'light' : 'dark');
+            } catch (e) {
+                console.warn('localStorage not available:', e);
+            }
         });
 
         // Load theme preference on page load
@@ -483,13 +492,18 @@ button:hover {
             editorWrappers.js.style.display = 'none';
             htmlEditor.refresh();
 
-            const savedTheme = localStorage.getItem('themePreference');
-            if (savedTheme === 'light') {
-                themeToggle.checked = true;
-                applyTheme(true);
-            } else {
-                themeToggle.checked = false;
-                applyTheme(false); // Apply dark theme by default if no preference or 'dark'
+            try {
+                const savedTheme = localStorage.getItem('themePreference');
+                if (savedTheme === 'light') {
+                    themeToggle.checked = true;
+                    applyTheme(true);
+                } else {
+                    themeToggle.checked = false;
+                    applyTheme(false);
+                }
+            } catch (e) {
+                console.warn('localStorage not available:', e);
+                applyTheme(false);
             }
         });
     </script>

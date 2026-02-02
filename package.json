@@ -1,11 +1,14 @@
 {
 	"name": "chrome_plugin",
 	"version": "1.0.0",
+	"homepage": "https://Pinkish-Warrior.github.io/CodeLab",
 	"main": "index.js",
 	"scripts": {
 		"dev": "cross-env NODE_ENV=development webpack-dev-server --inline --mode=development",
 		"build": "INLINE_RUNTIME_CHUNK=false cross-env NODE_ENV=production webpack --mode=production --progress",
-		"build:local": "cross-env NODE_ENV=production webpack --mode=production --progress --config webpack.config.local.js"
+		"build:local": "cross-env NODE_ENV=production webpack --mode=production --progress --config webpack.config.local.js",
+		"predeploy": "rm -rf dist && mkdir dist && cp index.html dist/index.html && cp -r favicon_io dist/favicon_io",
+		"deploy": "gh-pages -d dist"
 	},
 	"keywords": [],
 	"author": "",
@@ -25,6 +28,7 @@
 		"css-loader": "^3.1.0",
 		"extract-text-webpack-plugin": "^4.0.0-beta.0",
 		"file-loader": "^4.1.0",
+		"gh-pages": "^6.3.0",
 		"hard-source-webpack-plugin": "^0.13.1",
 		"html-webpack-include-assets-plugin": "^2.0.0",
 		"html-webpack-plugin": "^3.2.0",
